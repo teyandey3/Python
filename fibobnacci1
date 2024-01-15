@@ -1,19 +1,23 @@
-def funcFibo(v):
+#Observe the behavior of the recurrence function
 
-    v = int()
+def funcFibo(n):
 
-    if v == 0:
-        print("Fibonacci sequence first term is 1")
-    elif v == 1:
-        print("Fibonacci sequence second term is 1")
+    n = int(n)
+
+    print("Call Fibonacci sequence " + str(n) + "th")
+
+    if n < 0:
+        print("Invalid")
+        return 0
+
+    if n <= 1:
+        print("Fibonacci sequence " + str(n) + "th number is: " + str(n))
+        return n
     else:
-        resultF: int = funcFibo(v-1) + funcFibo(v-2)
+        resultF = funcFibo(n - 1) + funcFibo(n - 2)
+        print(f"Fibonacci sequence {n}th number is: {resultF}")
         return resultF
-    
-    k = str(v)
-    print("Fibonacci sequence:" + k + " term is " + resultF)
 
-print("Enter the number:")
-k:int = input()
+v = input("Enter the number: ")
 
-funcFibo(k)
+funcFibo(v)
