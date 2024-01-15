@@ -4,7 +4,7 @@ def funcFibo(n):
 
     n = int(n)
 
-    print("Call Fibonacci sequence " + str(n) + "th")
+    print("Call Fibonacci sequence: " + str(n) + "th")
 
     if n < 0:
         print("Invalid")
