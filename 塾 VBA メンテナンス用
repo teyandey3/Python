@@ -15,9 +15,9 @@ Sub ボタン①初期化プログラム()
     '表の形を決定する変数
     Dim 表行始 As Integer: 表行始 = ws.Range("A15").Row    '表の始点(行)を決定する変数（VBA画面でのみ変更可能）
     Dim 表列始 As Integer: 表列始 = ws.Range("A15").Column '表の始点(列)を決定する変数（VBA画面でのみ変更可能）
-    Dim 表列終 As Integer: 表列終 = ws.Range("Q7") + 1     'セルの範囲をQ7セルの数を変数に格納（列に入力する日数+"日付/時間"セルの個数一つ）
-    Dim コマ数 As Integer: コマ数 = ws.Range("U7") + 1     'セルの範囲をU7セルの数を変数に格納（コマ数+"日付/時間"セルの個数一つ）
-    Dim 見出束数 As Integer: 見出束数 = ws.Range("Y7")     'セルの範囲をY7セルの数を変数に格納
+    Dim 表列終 As Integer: 表列終 = ws.Range("Q7") + 1     'セルの範囲をC57セルの数を変数に格納（列に入力する日数+"日付/時間"セルの個数一つ）
+    Dim コマ数 As Integer: コマ数 = ws.Range("U7") + 1     'セルの範囲をC57セルの数を変数に格納（コマ数+"日付/時間"セルの個数一つ）
+    Dim 見出束数 As Integer: 見出束数 = ws.Range("Y7")     'セルの範囲をC58セルの数を変数に格納
     Dim 開始日列 As Integer: 開始日列 = 表列始 + 1
     
     '表の削除
@@ -106,9 +106,258 @@ Function 罫線引く(ByVal 罫行始 As Integer, ByVal 罫行終 As Integer, By
 
 End Function
 -------------------------------------------------------------------------
+Sub ボタン②新規シートを日程表に加工するプログラム()
 
+
+    Set ws = Worksheets("2操作画面（編集厳禁）")
+
+    Dim B15入力データ As String: B15入力データ = ws.Range("B15").Text 'B15のセルの文字を取得
+    Dim N1入力データ As String: N1入力データ = ws.Range("N1").Text    'N15のセルの文字を取得
+        
+    If B15入力データ = "開始日" Then                      'もし講習開始日をB15のセルに入力していなかったらエラーコードを表示
+        MsgBox "講習開始日をB15のセルに入力してください。"
+        Exit Sub                                          'プログラムの終了
+    ElseIf N1入力データ = "判定マーカー(消さないで)" Then 'もし間違えてボタン②を連続で二度押したら、エラーコードを表示
+        MsgBox "ボタン②を連続で二度押しています。この機能は現在使うことができません。" + vbCrLf + "ボタン③を押すか、最初から作業をやり直してください。"
+        Exit Sub
+    End If
+    
+    'エラーがなければ、以下のプログラムを実行
+    '変数の引継ぎ:表の範囲と形を決定する変数
+    Dim 表行始 As Integer: 表行始 = ws.Range("A15").Row    '（VBA画面でのみ変更可能）
+    Dim 表列始 As Integer: 表列始 = ws.Range("A15").Column '（VBA画面でのみ変更可能）
+    Dim 表列終 As Integer: 表列終 = ws.Range("Q7") + 1
+    Dim コマ数 As Integer: コマ数 = ws.Range("U7") + 1
+    Dim 見出束数 As Integer: 見出束数 = ws.Range("Y7")
+    Dim 開始日列 As Integer: 開始日列 = 表列始 + 1
+    Dim 表行終 As Integer: 表行終 = ws.Cells(表行始, 表列始).End(xlDown).Row
+    
+    '日付を自動入力する関数の呼び出し
+    Call 日付自動入力(表行始, 表行終, 表列始, 表列終, コマ数, 見出束数, 開始日列)
+    
+    '選択範囲を消去
+    Dim 表上削 As Integer: 表上削 = 表行始 - 1                   '表の一行上の位置を特定
+    Dim 表下削 As Integer: 表下削 = 表行終 + 1                   '表の一行下の位置を特定
+    Dim 表右削 As Integer: 表右削 = 表列終 + 1                   '表の一行右の位置を特定
+    ws.Range(Cells(表上削, 表列始), Cells(表上削, 表右削)).Clear '表の一行上を削除
+    ws.Range(Cells(表下削, 表列始), Cells(表下削, 表右削)).Clear '表の一行下を削除
+    ws.Range(Cells(表上削, 表右削), Cells(表下削, 表右削)).Clear '表の一行右を削除
+    
+    '上記のプログラムで消えてしまった表の下外枠を付けなおす
+    ws.Range(Cells(表行終, 表列始), Cells(表行終, 表列終)).Borders(xlEdgeBottom).Weight = xlThick
+    
+    '関数を挿入
+    ws.Range("J2").Formula = "=SUM(E2:I2)"
+    ws.Range("J3").Formula = "=COUNTIF(B16:P24,""=0"")+COUNTIF(B26:P34,""=0"")+COUNTIF(B36:P44,""=0"")"
+    ws.Range("K3").Formula = "=IF(J2=J3, """", ""エラー: 各教科のコマ数の合計と希望日程表に入力されたコマ数の合計が一致しません。"")"
+        
+    'ボタン②を連続で二度押すことを防ぐためのエラー判別マーカーを挿入
+    ws.Range("N1") = "判定マーカー(消さないで)"
+        
+    '次の操作を指示するメッセージの表示
+    MsgBox "各教科のコマ数を入力してください。"
+    
+    
+End Sub
+ 
+Function 日付自動入力(ByVal 日行始 As Integer, ByVal 日行終 As Integer, ByVal 日列始 As Integer, ByVal 日列終 As Integer, ByVal 日コマ数 As Integer, ByVal 日束数 As Integer, ByVal 日開始列 As Integer)
+    
+    
+    Set ws = Worksheets("2操作画面（編集厳禁）")
+  
+    '日付を保管する配列の作成
+    Dim 日付 As Date: 日付 = ws.Cells(日行始, 日開始列)      '入力したデータを参照して日付を自動入力する
+    Dim 日配() As Variant
+    Dim 日列数 As Integer: 日列数 = 日列終 - 日列始          '一束に入る日付の個数
+    Dim 日数 As Integer: 日数 = 日列数 * 日束数 + 日束数 - 1 '配列"日配"の要素数。-1は配列の0番目から格納するため-。+日束数は"日束数"個分の"番兵"を追加するため
+    ReDim 日配(日数) As Variant                              '配列を初期化
+    
+    '日付を配列に格納
+    For 日変 = 0 To 日数
+        If 日変 = 日列数 Then        'もし変数 "日変"が行幅と同じとき
+            日配(日変) = "番兵"      '配列"日付配"に"番兵"というマーカーを追加
+            日列数 = 日列数 + 日列終
+        Else
+            日配(日変) = 日付
+            日付 = 日付 + 1          '日付を一つずらす
+            GoTo Continue
+        End If
+Continue:
+    Next 日変
+
+    '日付をセルに代入
+    Dim 日貼配 As Variant                                   'セルに一括貼り付けをするために、配列"日配"から要素を表の横のサイズに合う個数だけ格納する配列
+    Dim 日貼列数 As Integer: 日貼列数 = 日列終 - 日列始 - 1 '一束に入る日付の個数を再定義。ただし、配列"日貼配"が0番目から始まるので-1する。
+    ReDim 日貼配(日貼列数) As Variant                       '配列を初期化、配列は"日列数"個を格納可能
+    Dim 日取変 As Integer: 日取変 = 0                       '配列"日付配"から要素を取り出す変数
+    
+    For 日変 = 0 To 日数
+        If 日配(日変) = "番兵" Then                                                            'もし配列"日付配"から"番兵"というマーカーを取り出したとき
+            ws.Range(Cells(日行始, 日開始列), Cells(日行始, 日列終)) = 日貼配                  '配列"日貼配"をセルに代入する。(注)以下五行の順番を変えないこと
+            ws.Range(Cells(日行始, 日開始列), Cells(日行始, 日列終)).NumberFormatLocal = "m/d(aaa)" '日付表記をyyyy/mm/ddから"m""月""d""日"" (月)に変更"
+            日取変 = 0                                                                         '配列"日貼配"の0番目の要素から配列"日配"の要素を再び格納開始
+            日行始 = 日行始 + 日コマ数
+        Else
+            日貼配(日取変) = 日配(日変)                                                        '配列"日付配"の0番目から"日列数"番目の要素を取り出し順に配列"日貼配"の0番目から"日列数"番目まで順に代入していく
+            日取変 = 日取変 + 1                                                                '変数をひとつずらす
+            GoTo 継続
+        End If
+継続:
+  Next 日変
+    
+    
+End Function
 -------------------------------------------------------------------------
+Sub ボタン③教科を自動で振り分けるプログラム()
 
+
+    Set ws = Worksheets("2操作画面（編集厳禁）")
+
+    '変数の引継ぎ:表の範囲と形を決定する変数
+    Dim 表行始 As Integer: 表行始 = ws.Range("A15").Row    '（VBA画面でのみ変更可能）
+    Dim 表列始 As Integer: 表列始 = ws.Range("A15").Column '（VBA画面でのみ変更可能）
+    Dim 表列終 As Integer: 表列終 = ws.Range("Q7") + 1
+    Dim コマ数 As Integer: コマ数 = ws.Range("U7") + 1
+    Dim 見出束数 As Integer: 見出束数 = ws.Range("Y7")
+    Dim 開始日列 As Integer: 開始日列 = 表列始 + 1
+    Dim 表行終 As Integer: 表行終 = ws.Cells(表行始, 表列始).End(xlDown).Row
+
+    '入力された各教科のコマ数を変数に格納
+    Dim 英コマ As Integer: 英コマ = Range("E2").Value - 1 'R2セルに入力された英語のコマ数を参照して"英コマ"という変数に格納
+    Dim 国コマ As Integer: 国コマ = Range("F2").Value     '上記の作業を五教科分繰り返す
+    Dim 数コマ As Integer: 数コマ = Range("G2").Value     '英語のコマ数は配列に最初に代入するため、あらかじめ１個分の個数を引いておく（0番目から14番目までの15個）
+    Dim 社コマ As Integer: 社コマ = Range("H2").Value
+    Dim 理コマ As Integer: 理コマ = Range("I2").Value
+    Dim 合計 As Integer: 合計 = 英コマ + 国コマ + 数コマ + 社コマ + 理コマ '配列は0番目数え始めるので1引く、配列に入る要素の個数は: (合計+1)個
+    
+    '各教科のコマ数の合計が希望表にあるコマ数の合計と一致しているか確認
+    If Not Range("J3").Value - 1 = 合計 Then
+        'もし一致していなければ、エラーメッセージを表示
+        MsgBox "各教科のコマ数の合計と希望コマ数の合計が一致していません。"
+        Exit Sub
+    ElseIf Range("J3").Value = 0 Or Range("J3").Value = "" Then
+        'もし合計が0なら、エラーメッセージを表示
+        MsgBox "各教科のコマ数を入力してください。"
+        Exit Sub
+    End If 'もし一致していたら、以下のプログラムを実行
+
+    '入力された各教科のコマ数を参考に配列内に教科名を格納
+    ReDim 教科(合計) As String '"季　英語"、"季　国語"、"季　数学"、"季　社会"、"季　理科"という文字を格納するための"教科()"という配列作成
+    
+    '格納するための関数を呼び出し
+    ReDim 教科納済(合計) As String
+    
+    教科納済() = 教科格納(教科(), 英コマ, 国コマ, 数コマ, 社コマ, 理コマ, 合計)
+        
+    '---配列の要素をランダムに入れ替え---
+    ReDim 教科乱済(合計) As String
+    
+    教科乱済() = 教科シャッフル(教科納済())
+    
+    '---シャッフル後の配列"教科"をセルに貼り付け---
+    Call 教科探索とセル貼付(教科乱済(), 表行始, 表行終, 表列始, 表列終)
+    
+    '選択範囲を消去
+    Range("J3").ClearContents
+    
+    '関数を挿入
+    Range("E3").Formula = "=COUNTIF(B16:O24,""=季　英語"")+COUNTIF(B26:O34,""=季　英語"")+COUNTIF(B36:O44,""=季　英語"")"
+    Range("F3").Formula = "=COUNTIF(B16:O24,""=季　国語"")+COUNTIF(B26:O34,""=季　国語"")+COUNTIF(B36:O44,""=季　国語"")"
+    Range("G3").Formula = "=COUNTIF(B16:O24,""=季　数学"")+COUNTIF(B26:O34,""=季　数学"")+COUNTIF(B36:O44,""=季　数学"")"
+    Range("H3").Formula = "=COUNTIF(B16:O24,""=季　社会"")+COUNTIF(B26:O34,""=季　社会"")+COUNTIF(B36:O44,""=季　社会"")"
+    Range("I3").Formula = "=COUNTIF(B16:O24,""=季　理科"")+COUNTIF(B26:O34,""=季　理科"")+COUNTIF(B36:O44,""=季　理科"")"
+    Range("J3").Formula = "=SUM(E3:I3)"
+    
+    '次の作業を指示するメッセージの表示
+    MsgBox "「確認用」の欄の数字が入力したコマ数と同じかを確認して" + vbCrLf + "ボタン④を押してください。"
+
+End Sub
+
+Function 教科格納(ByRef 教格納() As String, ByVal 納英コマ As Integer, ByVal 納国コマ As Integer, ByVal 納数コマ As Integer, ByVal 納社コマ As Integer, ByVal 納理コマ As Integer, ByVal 納合計 As Integer)
+    
+    '教科を自動入力
+    '文字を格納するための配列を作成                                                                         '←ここどうにかならんのか？
+    
+    For 英変 = 0 To 納英コマ              'Forループを使って英語のコマ数分、配列"教科()"に文字"英語"を配列の0番目から格納
+        教格納(英変) = "季　英語"
+    Next 英変
+    For 国変 = 英変 To 納英コマ + 納国コマ  '国語を配列に格納するときは、配列の(英変)番目からスタートして(英コマ + 国コマ)番目まで格納する。
+        教格納(国変) = "季　国語"         '上記の作業を五教科分繰り返す
+    Next 国変
+    For 数変 = 国変 To 納英コマ + 納国コマ + 納数コマ
+        教格納(数変) = "季　数学"
+    Next 数変
+    For 社変 = 数変 To 納英コマ + 納国コマ + 納数コマ + 納社コマ
+        教格納(社変) = "季　社会"
+    Next 社変
+    For 理変 = 社変 To 納英コマ + 納国コマ + 納数コマ + 納社コマ + 納理コマ
+        教格納(理変) = "季　理科"
+    Next 理変
+    
+    教科格納 = 教格納
+    
+End Function
+    
+Function 教科シャッフル(ByRef 教乱() As String)
+
+
+    Dim Index As Integer: Index = UBound(教乱) '配列の要素数を格納する変数
+    Dim 乱数 As Integer                        '乱数を格納する変数
+    Dim 一時保存 As String                     'ランダムに選ばれた教科を一時的に格納する変数
+    
+    If Index < 1 Then                           '教科が一つの時は配列をシャッフルしない
+        MsgBox "新規シートを作成してください。" 'メッセージの表示
+        Exit Function
+    End If
+    
+    Randomize '乱数の初期化
+    
+    For 替変 = Index To 0 Step -1    '最大のIndex番号から0まで減少させながら、以下を(最大のIndex番号+1=配列の要素数)回分実行する
+        乱数 = Int((替変 + 1) * Rnd) '乱数の生成
+        一時保存 = 教乱(乱数)        '配列"教科"に0以上要素数以下のランダムな整数を代入する
+        教乱(乱数) = 教乱(替変)      '教科(乱数)を教科(替変)に交換する
+        教乱(替変) = 一時保存        '教科(替変)を"一時保存"(=教科(替変)代入前の教科(乱数))に交換する
+    Next 替変
+
+    教科シャッフル = 教乱
+
+
+End Function
+
+Function 教科探索とセル貼付(ByRef 教探貼() As String, ByVal 教行始 As Integer, ByVal 教行終 As Integer, ByVal 教列始 As Integer, ByVal 教列終 As Integer)
+
+    
+
+    Dim 教行数 As Integer: 教行数 = 教行終 - 教行始 + 1 '表の行数
+    Dim セル As Variant: セル = Range(Cells(教行始, 教列始), Cells(教行終, 教列終)) 'シート指定された範囲(A15セルから表の最終セルまで)を配列"セル"に格納する
+    Dim 教取変 As Integer: 教取変 = 0                                               '配列"教科"から要素を取り出すための変数
+    
+    For 教行変 = 1 To 教行数                                                        '←もっと早いアルゴリズムがあるのでは？
+        For 教列変 = 1 To 教列終                    '縦一列目から下方向に検索開始
+            If セル(教行変, 教列変) = "0" Then      'もしセルに"0"と表示されていたら
+                セル(教行変, 教列変) = 教探貼(教取変) '配列"教科"の0番目から順に教科を選んで"0"を置き換える
+                教取変 = 教取変 + 1                 '配列"教科"を一つずらす
+            ElseIf セル(教行変, 教列変) = "1" Then
+                セル(教行変, 教列変) = "通　英語"   'もしセルに"1"と表示されていたらセルを"通　英語"で置き換える
+            ElseIf セル(教行変, 教列変) = "2" Then
+                セル(教行変, 教列変) = "通　国語"   '2 = "通　国語"
+            ElseIf セル(教行変, 教列変) = "3" Then
+                セル(教行変, 教列変) = "通　数学"   '3 = "通　数学"
+            ElseIf セル(教行変, 教列変) = "4" Then
+                セル(教行変, 教列変) = "通　社会"   '4 = "通　社会"
+            ElseIf セル(教行変, 教列変) = "5" Then
+                セル(教行変, 教列変) = "通　理科"   '5 = "通　理科"
+            Else                                    'もし"0"から"5"までの数字でなければ
+                GoTo Continue                       '上記の作業をスキップする
+            End If
+Continue:
+        Next 教列変
+    Next 教行変                                  '一列目が終わったら二列目の検索を開始
+    
+    Range(Cells(教行始, 教列始), Cells(教行終, 教列終)) = セル '編集した配列"セル"をシートに貼り付け
+    
+    
+End Function
 -------------------------------------------------------------------------
 Sub ボタン④新規シート作成と既存シートのデータをコピーペーストするプログラム()
 
@@ -256,6 +505,60 @@ Function 条件付き書式(ByVal 色一 As Double, ByVal 色濃一 As Double, B
 End Function
 -------------------------------------------------------------------------
 
+-------------------------------------------------------------------------
+Sub ボタン⑥書式設定()
+
+
+    Set ws = Worksheets("2操作画面（編集厳禁）")
+
+    Dim 余白上 As Double: 余白上 = ws.Range("Q3")      '上の余白はQ3セルを参照
+    Dim 余白下 As Double: 余白下 = ws.Range("R3")      '下の余白はR3セルを参照
+    Dim 余白右 As Double: 余白右 = ws.Range("S3")      '左の余白はS3セルを参照
+    Dim 余白左 As Double: 余白左 = ws.Range("T3")      '右の余白はT3セルを参照
+    Dim 行高 As Double: 行高 = ws.Range("U3")          '行の高さはU3セルを参照
+    Dim 列幅 As Double: 列幅 = ws.Range("V3")          '列の幅はV3セルを参照
+    Dim フォント As String: フォント = ws.Range("W3")  '文字書式はW3セルを参照
+    Dim 文字大 As Double: 文字大 = ws.Range("X3")      '文字サイズはX3セルを参照
+   
+
+    Call ページレイアウトと文字書式(余白上, 余白下, 余白右, 余白左, 行高, 文字大, フォント)
+
+    'K3セルの文字書式
+    ws.Range("K3").HorizontalAlignment = xlLeft '水平方向の文字配置を左揃えにする
+    'N1セルの文字書式
+    ws.Range("N1").HorizontalAlignment = xlLeft '水平方向の文字配置を左揃えにする
+    'Q3セルの文字書式
+    ws.Range("U4").HorizontalAlignment = xlLeft '水平方向の文字配置を左揃えにする
+
+End Sub
+
+Function ページレイアウトと文字書式(ByVal ぺ余白上 As Double, ByVal ぺ余白下 As Double, ByVal ぺ余白右 As Double, ByVal ぺ余白左 As Double, ByVal ぺ行高 As Double, ByVal ぺ文字大 As Double, ByVal ぺフォント As String)
+
+    Set ws = Worksheets("2操作画面（編集厳禁）")
+
+    'ページレイアウト
+    With ws.PageSetup
+        .TopMargin = Application.CentimetersToPoints(ぺ余白上)    '上の余白を変更 (Application.CentimetersToPointsはcmを1ポイント=約0.35mmに変換するメソッド)
+        .BottomMargin = Application.CentimetersToPoints(ぺ余白下) '下の余白を変更
+        .LeftMargin = Application.CentimetersToPoints(ぺ余白右)   '左の余白を変更
+        .RightMargin = Application.CentimetersToPoints(ぺ余白左)  '右の余白を変更
+        .HeaderMargin = 0                                         'ヘッダーを0にする
+        .FooterMargin = 0                                         'フッターを0にする
+        .CenterVertically = True                                  '印刷位置を垂直方向のページ中央にする
+        .CenterHorizontally = True                                '印刷位置を水平方向のページ中央にする
+    End With
+    
+    '文字書式
+    With ws.Cells
+        .RowHeight = Application.CentimetersToPoints(ぺ行高) '行の高さを変更
+        .Font.Name = ぺフォント                              'フォントを変更
+        .Font.Size = ぺ文字大                                '文字サイズを変更
+        .VerticalAlignment = xlTop                           '垂直方向の文字配置を上揃えにする
+        .HorizontalAlignment = xlCenter                      '水平方向の文字配置を中央揃えにする
+    End With
+
+
+End Function
 -------------------------------------------------------------------------
 Sub ボタン⑦表の設定をすべてデフォルトにする()
 
