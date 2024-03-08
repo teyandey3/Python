@@ -571,7 +571,7 @@ Sub ボタン⑦表の設定をすべてデフォルトにする()
     ws.Range("S3") = 2           '余白の右
     ws.Range("T3") = 2           '余白の左
     ws.Range("U3") = 0.48        '行の高さ
-    ws.Range("V3") = 1.7         '列の幅
+    ws.Range("V3") = 7.35        '列の幅
     ws.Range("W3") = "Yu Gothic" 'フォント
     ws.Range("X3") = 10          '字大きさ
     
