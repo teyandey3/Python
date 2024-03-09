@@ -218,7 +218,6 @@ Sub ボタン③教科を自動で振り分けるプログラム()
     Dim 表列終 As Integer: 表列終 = ws.Range("Q7") + 1
     Dim コマ数 As Integer: コマ数 = ws.Range("U7") + 1
     Dim 見出束数 As Integer: 見出束数 = ws.Range("Y7")
-    Dim 開始日列 As Integer: 開始日列 = 表列始 + 1
     Dim 表行終 As Integer: 表行終 = ws.Cells(表行始, 表列始).End(xlDown).Row
 
     '入力された各教科のコマ数を変数に格納
