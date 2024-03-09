@@ -130,8 +130,7 @@ Sub ボタン②新規シートを日程表に加工するプログラム()
     Dim 表行終 As Integer: 表行終 = ws.Cells(表行始, 表列始).End(xlDown).Row
 
     '日付を自動入力する関数の呼び出し
-    Dim 開始日列 As Integer: 開始日列 = 表列始 + 1 '日付の開始場所を特定する（"日/時"見出しが入る一つ分を除く）
-    Call 日付自動入力(表行始, 表行終, 表列始, 表列終, コマ数, 見出束数, 開始日列)
+    Call 日付自動入力(表行始, 表行終, 表列始, 表列終, コマ数, 見出束数)
     
     '選択範囲を消去
     Dim 表上削 As Integer: 表上削 = 表行始 - 1                   '表の一行上の位置を特定
@@ -158,12 +157,13 @@ Sub ボタン②新規シートを日程表に加工するプログラム()
     
 End Sub
  
-Function 日付自動入力(ByVal 日行始 As Integer, ByVal 日行終 As Integer, ByVal 日列始 As Integer, ByVal 日列終 As Integer, ByVal 日コマ数 As Integer, ByVal 日束数 As Integer, ByVal 日開始列 As Integer)
+Function 日付自動入力(ByVal 日行始 As Integer, ByVal 日行終 As Integer, ByVal 日列始 As Integer, ByVal 日列終 As Integer, ByVal 日コマ数 As Integer, ByVal 日束数 As Integer)
     
     
     Set ws = Worksheets("2操作画面（編集厳禁）")
   
     '日付を保管する配列の作成
+    Dim 日開始列 As Integer: 日開始列 = 日列始 + 1           '日付の開始場所を特定する（"日/時"見出しが入る一つ分を除く）
     Dim 日開始列 As Integer: 日開始列 = 日列始 + 1           '日付の開始場所を特定する（"日/時"見出しが入る一つ分を除く）
     Dim 日付 As Date: 日付 = ws.Cells(日行始, 日開始列)      '入力したデータを参照して日付を自動入力する
     Dim 日配() As Variant
