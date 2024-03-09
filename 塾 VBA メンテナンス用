@@ -432,7 +432,7 @@ Sub ボタン④新規シート作成と既存シートのデータをコピー�
     
 End Sub
 
-Function ページレイアウトと文字書式(ByVal ぺ余白上 As Double, ByVal ぺ余白下 As Double, ByVal ぺ余白右 As Double, ByVal ぺ余白左 As Double, ByVal ぺ行高 As Double, ByVal ぺ文字大 As Double, ByVal ぺフォント As String)
+Function ページレイアウトと文字書式(ByVal ぺ余白上 As Double, ByVal ぺ余白下 As Double, ByVal ぺ余白右 As Double, ByVal ぺ余白左 As Double, ByVal ぺ行高 As Double, ByVal ぺ列幅, ByVal ぺ文字大 As Double, ByVal ぺフォント As String)
 
 
     'ページレイアウト
