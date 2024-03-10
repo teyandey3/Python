@@ -191,11 +191,11 @@ Continue:
     
     For 日変 = 0 To 日数
         If 日配(日変) = "番兵" Then                                           'もし配列"日付配"から"番兵"というマーカーを取り出したとき
-            ws.Range(Cells(日行始, 日開始列), Cells(日行始, 日列終)) = 日貼配 '配列"日貼配"をセルに代入する。(注)以下五行の順番を変えないこと
             With ws.Range(Cells(日行始, 日開始列), Cells(日行始, 日列終))
-                .NumberFormatLocal = "m/d(aaa)"                               '日付表記をyyyy/mm/ddから"m""月""d""日"" (月)に変更"
-                .FormatConditions.Delete                                      '条件付き書式設定を初期
+                .Value = 日貼配                                           '配列"日貼配"をセルに代入する。(注)以下五行の順番を変えないこと
+                .NumberFormatLocal = "m/d(aaa)"                           '日付表記をyyyy/mm/ddから"m""月""d""日"" (月)に変更"
             End With
+            Call 土日条件付書式(日行始, 日開始列, 日列終)                   '土日に色を付ける条件付き書式を設定する関数の呼び出し
             日取変 = 0                                                        '配列"日貼配"の0番目の要素から配列"日配"の要素を再び格納開始
             日行始 = 日行始 + 日コマ数
         Else
@@ -207,6 +207,26 @@ Continue:
   Next 日変
     
     
+End Function
+
+Function 土日条件付書式(ByVal 土行始 As Integer, ByVal 土開始列 As Integer, ByVal 土列終 As Integer)
+
+
+    Set ws = Worksheets("2操作画面（編集厳禁）")
+
+    Dim 書式設定一  As FormatCondition
+    Dim 書式設定二  As FormatCondition
+    
+    With ws.Range(Cells(土行始, 土開始列), Cells(土行始, 土列終))
+        .FormatConditions.Delete                                                                   '条件付き書式設定を初期
+        Set 書式設定一 = .FormatConditions.Add(Type:=xlExpression, Formula1:="=WEEKDAY(B15,2)>=6") '選択範囲に(Formula1:=)と(Type:=xlExpression)を用いて関数(TEXT(A3,"aaa")="土")を適用
+        With 書式設定一.Interior                                                                   'B15の部分は（VBA画面でのみ変更可能）（注）表をAの列(1列目)から始めるとき、日付はB列(2列目)から始まる
+            .ThemeColor = xlThemeColorAccent3                                                      'ThemeColorは色一覧の列の左から7番目の灰色、アクセント３（VBA画面でのみ変更可能）
+            .TintAndShade = 0.6                                                                    'TintAndShadeは基本色 +60%の場所（％を小数表記）（VBA画面でのみ変更可能）
+        End With
+    End With
+            
+            
 End Function
 -------------------------------------------------------------------------
 Sub ボタン③教科を自動で振り分けるプログラム()
