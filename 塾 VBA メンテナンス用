@@ -407,7 +407,7 @@ Sub ボタン④新規シート作成と既存シートのデータをコピー�
     '新しい表の調整
     With Worksheets("仮名")                                  '余分な部分の削除
         .Rows("3:14").Delete                                 'シート"仮名"の3行目から14行目を削除（VBA画面でのみ変更可能）
-        .Range("P1:AC2").Delete                              'P1:からC2セルのメモ欄を削除'（VBA画面でのみ変更可能）
+        .Range("P1:AG2").Delete                              'P1:からC2セルのメモ欄を削除'（VBA画面でのみ変更可能）
     End With
     
     Dim 余白上 As Double: 余白上 = ws.Range("Q3")      '上の余白はQ3セルを参照
@@ -421,26 +421,15 @@ Sub ボタン④新規シート作成と既存シートのデータをコピー�
 
     Call ページレイアウトと文字書式(余白上, 余白下, 余白右, 余白左, 行高, 列幅, 文字大, フォント)
 
-    '条件付き書式の設定
-    Dim 季英 As Double: 季英 = ws.Range("AD2")          '各教科で使用する色とその濃度を"色番号と濃度表"の各セルの値を参照して指定
-    Dim 季英濃度  As Double: 季英濃度 = ws.Range("AE2")
+    '条件付き書式の設定（以下のセル表記はすべてVBA画面でのみ変更可能）
+    Dim 行始 As Integer: 行始 = Worksheets("仮名").Range("A3").Row                   '表の始まりの範囲(行)
+    Dim 行終 As Integer: 行終 = Worksheets("仮名").Range("A3").End(xlDown).Row       '表の最終位置を測定して結果を変数に格納(行)
+    Dim 列始 As Integer: 列始 = Worksheets("仮名").Range("A3").Column                '表の始まりの範囲(列)
+    Dim 列終 As Integer: 列終 = Worksheets("仮名").Range("A3").End(xlToRight).Column '表の最終位置を測定して結果を変数に格納(列)
     
-    Dim 季国 As Double: 季国 = ws.Range("AD3")
-    Dim 季国濃度 As Double: 季国濃度 = ws.Range("AE3")
+    Call 土日条件付書式(行始, 行終, 列始, 列終)
     
-    Dim 季数 As Double: 季数 = ws.Range("AD4")
-    Dim 季数濃度 As Double: 季数濃度 = ws.Range("AE4")
-    
-    Dim 季社 As Double: 季社 = ws.Range("AD5")
-    Dim 季社濃度  As Double: 季社濃度 = ws.Range("AE5")
-    
-    Dim 季理 As Double: 季理 = ws.Range("AD6")
-    Dim 季理濃度 As Double: 季理濃度 = ws.Range("AE6")
-    
-    Call 条件付書式(季英, 季英濃度, 季国, 季国濃度, 季数, 季数濃度, 季社, 季社濃度, 季理, 季理濃度)
-    
-    Call 条件付き書式(季英, 季英濃度, 季国, 季国濃度, 季数, 季数濃度, 季社, 季社濃度, 季理, 季理濃度)
-
+    Call 条件付書式(行始, 行終, 列始, 列終)
     
     '複製したシートの名前を生徒名に変更
     Worksheets("仮名").Name = 名前
@@ -482,48 +471,66 @@ Function ページレイアウトと文字書式(ByVal ぺ余白上 As Double, B
 
 End Function
 
-Function 条件付き書式(ByVal 色一 As Double, ByVal 色濃一 As Double, ByVal 色二 As Double, ByVal 色濃二 As Double, ByVal 色三 As Double, ByVal 色濃三 As Double, ByVal 色四 As Double, ByVal 色濃四 As Double, ByVal 色五 As Double, ByVal 色濃五 As Double)
+Function 土日条件付書式(ByVal 土行始 As Integer, ByVal 土行終 As Integer, ByVal 土列始 As Integer, ByVal 土列終 As Integer)
+
 
     Set ws = Worksheets("2操作画面（編集厳禁）")
 
-    Dim 行終 As Integer: 行終 = Range("A3").End(xlDown).Row       'セルの範囲を測定して結果を変数に格納(行)（VBA画面でのみ変更可能）
-    Dim 列終 As Integer: 列終 = Range("A3").End(xlToRight).Column 'セルの範囲を測定して結果を変数に格納(列)（VBA画面でのみ変更可能）
+    Dim 書式設定一  As FormatCondition
+    
+    With Worksheets("仮名").Range(Cells(土行始, 土列始), Cells(土行終, 土列終))
+        .FormatConditions.Delete                                                                                '条件付き書式設定を初期
+        Set 書式設定一 = .FormatConditions.Add(Type:=xlExpression, Formula1:="=AND(WEEKDAY(A3,2)>=6,A3<>"""")") '選択範囲に(Formula1:=)と(Type:=xlExpression)を用いて関数(=AND(WEEKDAY(A15,2)>=6,B15<>""))を適用。
+        With 書式設定一.Interior                                                                                'A3の部分は（VBA画面でのみ変更可能）（注）表をAの列(1列目)から始めるとき、日付はB列(2列目)から始まる
+            .ThemeColor = ws.Range("AD7")                                                                       '色と濃度を"色番号と濃度表"の各セルの値を参照して指定
+            .TintAndShade = ws.Range("AE7")
+        End With
+    End With
+            
+            
+End Function
+
+Function 条件付書式(ByVal 条行始 As Integer, ByVal 条行終 As Integer, ByVal 条列始 As Integer, ByVal 条列終 As Integer)
+
+
+    Set ws = Worksheets("2操作画面（編集厳禁）")
+
     Dim 書式設定一  As FormatCondition
     Dim 書式設定二  As FormatCondition
     Dim 書式設定三  As FormatCondition
     Dim 書式設定四  As FormatCondition
     Dim 書式設定五  As FormatCondition
     
-    
-    With Worksheets("仮名").Range(Cells(1, 1), Cells(行終, 列終)) '教科別の書式設定
-        .FormatConditions.Delete                                  '書式設定を初期
+    '---（以下のセル表記はすべてVBA画面でのみ変更可能）---
+    With Worksheets("仮名").Range(Cells(条行始, 条列始), Cells(条行終, 条列終)) '教科別の書式設定
+        .FormatConditions.Delete                                                '書式設定を初期
         Set 書式設定一 = .FormatConditions.Add(Type:=xlCellValue, Operator:=xlEqual, Formula1:=ws.Range("Q11").Value) 'セルの値(Formula1:=Range("Q11"))を参照して(Type:=xlCellValue、例:季　英語)と完全一致(Operator:=xlEqual)しているセルに書式を適用
         With 書式設定一.Interior
-            .ThemeColor = 色一       'ThemeColorは色一覧の列
-            .TintAndShade = 色濃一 'TintAndShadeは基本色 +QQ%の場所（％を小数表記）
+            .ThemeColor = ws.Range("AD2")       'ThemeColorは色一覧の列
+            .TintAndShade = ws.Range("AE2") 'TintAndShadeは基本色 +QQ%の場所（％を小数表記）
         End With
         Set 書式設定二 = .FormatConditions.Add(Type:=xlCellValue, Operator:=xlEqual, Formula1:=ws.Range("R11").Value)
         With 書式設定二.Interior
-            .ThemeColor = 色二
-            .TintAndShade = 色濃二
+            .ThemeColor = ws.Range("AD3")
+            .TintAndShade = ws.Range("AE3")
         End With
         Set 書式設定三 = .FormatConditions.Add(Type:=xlCellValue, Operator:=xlEqual, Formula1:=ws.Range("S11").Value)
         With 書式設定三.Interior
-            .ThemeColor = 色三
-            .TintAndShade = 色濃三
+            .ThemeColor = ws.Range("AD4")
+            .TintAndShade = ws.Range("AE4")
         End With
         Set 書式設定四 = .FormatConditions.Add(Type:=xlCellValue, Operator:=xlEqual, Formula1:=ws.Range("T11").Value)
         With 書式設定四.Interior
-            .ThemeColor = 色四
-            .TintAndShade = 色濃四
+            .ThemeColor = ws.Range("AD5")
+            .TintAndShade = ws.Range("AE5")
         End With
         Set 書式設定五 = .FormatConditions.Add(Type:=xlCellValue, Operator:=xlEqual, Formula1:=ws.Range("U11").Value)
         With 書式設定五.Interior
-            .ThemeColor = 色五
-            .TintAndShade = 色濃五
+            .ThemeColor = ws.Range("AD6")
+            .TintAndShade = ws.Range("AE6")
         End With
     End With
-
+     '---ここまで---
 
 End Function
 -------------------------------------------------------------------------
