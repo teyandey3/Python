@@ -460,6 +460,7 @@ Function ページレイアウトと文字書式(ByVal ぺ余白上 As Double, B
     
     '文字書式
     With Worksheets("仮名").Cells
+        .FormatConditions.Delete                             '書式設定を初期
         .RowHeight = Application.CentimetersToPoints(ぺ行高) '行の高さを変更
         .ColumnWidth = ぺ列幅                                '列の幅を変更
         .Font.Name = ぺフォント                              'フォントを変更
@@ -479,7 +480,6 @@ Function 土日条件付書式(ByVal 土行始 As Integer, ByVal 土行終 As In
     Dim 書式設定一  As FormatCondition
     
     With Worksheets("仮名").Range(Cells(土行始, 土列始), Cells(土行終, 土列終))
-        .FormatConditions.Delete                                                                                '条件付き書式設定を初期
         Set 書式設定一 = .FormatConditions.Add(Type:=xlExpression, Formula1:="=AND(WEEKDAY(A3,2)>=6,A3<>"""")") '選択範囲に(Formula1:=)と(Type:=xlExpression)を用いて関数(=AND(WEEKDAY(A15,2)>=6,B15<>""))を適用。
         With 書式設定一.Interior                                                                                'A3の部分は（VBA画面でのみ変更可能）（注）表をAの列(1列目)から始めるとき、日付はB列(2列目)から始まる
             .ThemeColor = ws.Range("AD7")                                                                       '色と濃度を"色番号と濃度表"の各セルの値を参照して指定
@@ -503,10 +503,9 @@ Function 条件付書式(ByVal 条行始 As Integer, ByVal 条行終 As Integer,
     
     '---（以下のセル表記はすべてVBA画面でのみ変更可能）---
     With Worksheets("仮名").Range(Cells(条行始, 条列始), Cells(条行終, 条列終)) '教科別の書式設定
-        .FormatConditions.Delete                                                '書式設定を初期
         Set 書式設定一 = .FormatConditions.Add(Type:=xlCellValue, Operator:=xlEqual, Formula1:=ws.Range("Q11").Value) 'セルの値(Formula1:=Range("Q11"))を参照して(Type:=xlCellValue、例:季　英語)と完全一致(Operator:=xlEqual)しているセルに書式を適用
         With 書式設定一.Interior
-            .ThemeColor = ws.Range("AD2")       'ThemeColorは色一覧の列
+            .ThemeColor = ws.Range("AD2")   'ThemeColorは色一覧の列
             .TintAndShade = ws.Range("AE2") 'TintAndShadeは基本色 +QQ%の場所（％を小数表記）
         End With
         Set 書式設定二 = .FormatConditions.Add(Type:=xlCellValue, Operator:=xlEqual, Formula1:=ws.Range("R11").Value)
