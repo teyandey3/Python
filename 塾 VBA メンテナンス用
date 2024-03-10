@@ -220,7 +220,7 @@ Function 土日条件付書式()
     
     With ws.Rows("1:1048576")                                                                                         'A1からexcelの最終行である1048576行目を利用しているため修正不要
         .FormatConditions.Delete                                                                                      '条件付き書式設定を初期
-        Set 書式設定一 = .FormatConditions.Add(Type:=xlExpression, Formula1:="=AND(WEEKDAY(A1,2)>=6,A1<>"""",A1<>1)") '選択範囲に(Formula1:=)と(Type:=xlExpression)を用いて関数(=AND(WEEKDAY(A15,2)>=6,A15<>"",A15<>1))を適用。
+        Set 書式設定一 = .FormatConditions.Add(Type:=xlExpression, Formula1:="=AND(WEEKDAY(A1,2)>=6,A1<>"""",A1<>1)") '選択範囲に(Formula1:=)と(Type:=xlExpression)を用いて関数(=AND(WEEKDAY(A1,2)>=6,A1<>"",A1<>1))を適用
         With 書式設定一.Interior                                                                                   
             .ThemeColor = ws.Range("AD7")                                                                             '色と濃度を"色番号と濃度表"の各セルの値を参照して指定
             .TintAndShade = ws.Range("AE7")
