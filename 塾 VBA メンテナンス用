@@ -20,18 +20,18 @@ Sub ボタン①初期化プログラム()
     Dim 見出束数 As Integer: 見出束数 = ws.Range("Y7")     'セルの範囲をC58セルの数を変数に格納
     
     '表の削除
-    ws.Range("B2:J2").ClearContents 'セルB2からJ2の内容を消去（VBA画面でのみ変更可能）
-    ws.Range("E3:J3").ClearContents 'セルE3からJ3の内容を消去（VBA画面でのみ変更可能）
+    Dim 表上削 As Integer: 表上削 = 表行始 - 1                              '表の一行上の位置を特定
     
-    Dim 表上削 As Integer: 表上削 = 表行始 - 1 '表の一行上の位置を特定
-    ws.Range(Cells(表上削, 表列始), Cells(Rows.Count, Columns.Count)).Clear
+    ws.Range(Cells(表上削, 表列始), Cells(Rows.Count, Columns.Count)).Clear '表の一行上から最終行まで削除
+    ws.Range("B2:J2").ClearContents                                         'セルB2からJ2の内容を消去（VBA画面でのみ変更可能）
+    ws.Range("E3:J3").ClearContents                                         'セルE3からJ3の内容を消去（VBA画面でのみ変更可能）
     
     '時刻見出作成を作成する関数の呼び出し
     Call 時刻見出作成(表行始, 表列始, コマ数, 見出束数)
 
     '表の終点を決定する変数
     Dim 表行終 As Integer: 表行終 = ws.Cells(表行始, 表列始).End(xlDown).Row '時刻見出しを利用して表の最終行を測定し、その結果を変数に格納(行)
-      
+    
     '罫線を引く関数の呼び出し
     Call 罫線引く(表行始, 表行終, 表列始, 表列終, コマ数, 見出束数)
     
