@@ -223,8 +223,8 @@ Function 土日条件付書式(ByVal 土行始 As Integer, ByVal 土行終 As In
         .FormatConditions.Delete                                                                                 '条件付き書式設定を初期
         Set 書式設定一 = .FormatConditions.Add(Type:=xlExpression, Formula1:="=AND(WEEKDAY(A15,2)>=6,A15<>"""")") '選択範囲に(Formula1:=)と(Type:=xlExpression)を用いて関数(=WEEKDAY(B15,2)>=6)を適用
         With 書式設定一.Interior                                                                                  'A15の部分は（VBA画面でのみ変更可能）（注）表をAの列(1列目)から始めるとき、日付はB列(2列目)から始まる
-            .ThemeColor = xlThemeColorAccent3                                                                    'ThemeColorは色一覧の列の左から7番目の灰色、アクセント３（VBA画面でのみ変更可能）
-            .TintAndShade = 0.6                                                                                  'TintAndShadeは基本色 +60%の場所（％を小数表記）（VBA画面でのみ変更可能）
+            .ThemeColor = ws.Range("AD7")                                                                         '色と濃度を"色番号と濃度表"の各セルの値を参照して指定
+            .TintAndShade = ws.Range("AE7")
         End With
     End With
             
@@ -422,22 +422,22 @@ Sub ボタン④新規シート作成と既存シートのデータをコピー�
     Call ページレイアウトと文字書式(余白上, 余白下, 余白右, 余白左, 行高, 列幅, 文字大, フォント)
 
     '条件付き書式の設定
-    '---各教科で使用する色とその濃度を指定（以下全てVBA画面でのみ変更可能）---
-    Dim 季英 As Double: 季英 = 10
-    Dim 季英濃度  As Double: 季英濃度 = 0.6
+    Dim 季英 As Double: 季英 = ws.Range("AD2")          '各教科で使用する色とその濃度を"色番号と濃度表"の各セルの値を参照して指定
+    Dim 季英濃度  As Double: 季英濃度 = ws.Range("AE2")
     
-    Dim 季国 As Double: 季国 = 9           '色は色一覧の左から1,2,3...,9,10となる。
-    Dim 季国濃度 As Double: 季国濃度 = 0.6 '濃度は基本色 +QQ％を小数表記したもの
+    Dim 季国 As Double: 季国 = ws.Range("AD3")
+    Dim 季国濃度 As Double: 季国濃度 = ws.Range("AE3")
     
-    Dim 季数 As Double: 季数 = 8
-    Dim 季数濃度 As Double: 季数濃度 = 0.6
+    Dim 季数 As Double: 季数 = ws.Range("AD4")
+    Dim 季数濃度 As Double: 季数濃度 = ws.Range("AE4")
     
-    Dim 季社 As Double: 季社 = 6
-    Dim 季社濃度  As Double: 季社濃度 = 0.6
+    Dim 季社 As Double: 季社 = ws.Range("AD5")
+    Dim 季社濃度  As Double: 季社濃度 = ws.Range("AE5")
     
-    Dim 季理 As Double: 季理 = 5
-    Dim 季理濃度 As Double: 季理濃度 = 0.6
-    '---（ここまで全てVBA画面でのみ変更可能）---
+    Dim 季理 As Double: 季理 = ws.Range("AD6")
+    Dim 季理濃度 As Double: 季理濃度 = ws.Range("AE6")
+    
+    Call 条件付書式(季英, 季英濃度, 季国, 季国濃度, 季数, 季数濃度, 季社, 季社濃度, 季理, 季理濃度)
     
     Call 条件付き書式(季英, 季英濃度, 季国, 季国濃度, 季数, 季数濃度, 季社, 季社濃度, 季理, 季理濃度)
 
@@ -617,6 +617,22 @@ Sub ボタン⑦表の設定をすべてデフォルトにする()
     Dim 時刻 As Variant: 時刻 = Array("日/時", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00")
     
     ws.Range("Q9:Z9") = 時刻
+
+    '条件付き書式の色設定
+    '色番号
+    ws.Range("AD2") = 10
+    ws.Range("AD3") = 9
+    ws.Range("AD4") = 8
+    ws.Range("AD5") = 6
+    ws.Range("AD6") = 5
+    ws.Range("AD7") = 7
+    '色濃度
+    ws.Range("AE2") = 0.6
+    ws.Range("AE3") = 0.6
+    ws.Range("AE4") = 0.6
+    ws.Range("AE5") = 0.6
+    ws.Range("AE6") = 0.6
+    ws.Range("AE7") = 0.6
 
 
 End Sub
