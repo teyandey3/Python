@@ -219,7 +219,7 @@ Function 土日条件付書式(ByVal 土行始 As Integer, ByVal 土開始列 As
     
     With ws.Range(Cells(土行始, 土開始列), Cells(土行始, 土列終))
         .FormatConditions.Delete                                                                   '条件付き書式設定を初期
-        Set 書式設定一 = .FormatConditions.Add(Type:=xlExpression, Formula1:="=WEEKDAY(B15,2)>=6") '選択範囲に(Formula1:=)と(Type:=xlExpression)を用いて関数(TEXT(A3,"aaa")="土")を適用
+        Set 書式設定一 = .FormatConditions.Add(Type:=xlExpression, Formula1:="=WEEKDAY(B15,2)>=6") '選択範囲に(Formula1:=)と(Type:=xlExpression)を用いて関数(=WEEKDAY(B15,2)>=6)を適用
         With 書式設定一.Interior                                                                   'B15の部分は（VBA画面でのみ変更可能）（注）表をAの列(1列目)から始めるとき、日付はB列(2列目)から始まる
             .ThemeColor = xlThemeColorAccent3                                                      'ThemeColorは色一覧の列の左から7番目の灰色、アクセント３（VBA画面でのみ変更可能）
             .TintAndShade = 0.6                                                                    'TintAndShadeは基本色 +60%の場所（％を小数表記）（VBA画面でのみ変更可能）
