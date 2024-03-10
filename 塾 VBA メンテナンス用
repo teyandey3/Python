@@ -221,8 +221,8 @@ Function 土日条件付書式(ByVal 土行始 As Integer, ByVal 土行終 As In
     
     With ws.Range(Cells(土行始, 土列始), Cells(土行終, 土列終))
         .FormatConditions.Delete                                                                                 '条件付き書式設定を初期
-        Set 書式設定一 = .FormatConditions.Add(Type:=xlExpression, Formula1:="=AND(WEEKDAY(A15,2)>=6,A15<>"""",A3<>1)") '選択範囲に(Formula1:=)と(Type:=xlExpression)を用いて関数(=AND(WEEKDAY(A15,2)>=6,B15<>""))を適用。
-        With 書式設定一.Interior                                                                                        'A15の部分は（VBA画面でのみ変更可能）（注）表をAの列(1列目)から始めるとき、日付はB列(2列目)から始まる
+        Set 書式設定一 = .FormatConditions.Add(Type:=xlExpression, Formula1:="=AND(WEEKDAY(A15,2)>=6,A15<>"""",A15<>1)") '選択範囲に(Formula1:=)と(Type:=xlExpression)を用いて関数(=AND(WEEKDAY(A15,2)>=6,A15<>"",A15<>1))を適用。
+        With 書式設定一.Interior                                                                                         'A15の部分は（VBA画面でのみ変更可能）（注）表をAの列(1列目)から始めるとき、日付はB列(2列目)から始まる
             .ThemeColor = ws.Range("AD7")                                                                               '色と濃度を"色番号と濃度表"の各セルの値を参照して指定
             .TintAndShade = ws.Range("AE7")
         End With
