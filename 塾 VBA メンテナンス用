@@ -142,7 +142,10 @@ Sub ボタン②新規シートを日程表に加工するプログラム()
     ws.Range(Cells(表上削, 表列始), Cells(表上削, 表右削)).Clear '表の一行上を削除
     ws.Range(Cells(表下削, 表列始), Cells(表下削, 表右削)).Clear '表の一行下を削除
     ws.Range(Cells(表上削, 表右削), Cells(表下削, 表右削)).Clear '表の一行右を削除
-    
+
+    '余分な部分についた条件付き書式設定を初期
+    ws.Range(Cells(2, 1), Cells(表上削, Columns.Count)).FormatConditions.Delete
+
     '上記のプログラムで消えてしまった表の下外枠を付けなおす
     ws.Range(Cells(表行終, 表列始), Cells(表行終, 表列終)).Borders(xlEdgeBottom).Weight = xlThick
     
