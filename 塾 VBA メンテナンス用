@@ -128,12 +128,12 @@ Sub ボタン②新規シートを日程表に加工するプログラム()
     Dim コマ数 As Integer: コマ数 = ws.Range("U7") + 1
     Dim 見出束数 As Integer: 見出束数 = ws.Range("Y7")
     Dim 表行終 As Integer: 表行終 = ws.Cells(表行始, 表列始).End(xlDown).Row
-
+    
     '日付を自動入力する関数の呼び出し
     Call 日付自動入力(表行始, 表行終, 表列始, 表列終, コマ数, 見出束数)
-
+    
     '土日に色を付ける条件付き書式を設定する関数の呼び出し
-    Call 土日条件付書式(表行始, 表行終, 表列始, 表列終)
+    Call 土日条件付書式
     
     '選択範囲を消去
     Dim 表上削 As Integer: 表上削 = 表行始 - 1                   '表の一行上の位置を特定
@@ -152,7 +152,7 @@ Sub ボタン②新規シートを日程表に加工するプログラム()
     ws.Range("K3").Formula = "=IF(J2=J3, """", ""エラー: 各教科のコマ数の合計と希望日程表に入力されたコマ数の合計が一致しません。"")"
         
     'ボタン②を連続で二度押すことを防ぐためのエラー判別マーカーを挿入
-    ws.Range("N1") = "判定マーカー(消さないで)"
+    ws.Range("N1") = "判定マーカー(消さないで)" '（VBA画面でのみ変更可能）
         
     '次の操作を指示するメッセージの表示
     MsgBox "各教科のコマ数を入力してください。"
@@ -166,8 +166,8 @@ Function 日付自動入力(ByVal 日行始 As Integer, ByVal 日行終 As Integ
     Set ws = Worksheets("2操作画面（編集厳禁）")
   
     '日付を保管する配列の作成
-    Dim 日開始列 As Integer: 日開始列 = 日列始 + 1           '日付の開始場所を特定する（"日/時"見出しが入る一つ分を除く）
-    Dim 日付 As Date: 日付 = ws.Cells(日行始, 日開始列)      '入力したデータを参照して日付を自動入力する
+    Dim 開始日列 As Integer: 開始日列 = 日列始 + 1           '日付の開始場所を特定する（"日/時"見出しが入る一つ分を除く）
+    Dim 日付 As Date: 日付 = ws.Cells(日行始, 開始日列)      '入力したデータを参照して日付を自動入力する
     Dim 日配() As Variant
     Dim 日列数 As Integer: 日列数 = 日列終 - 日列始          '一束に入る日付の個数
     Dim 日数 As Integer: 日数 = 日列数 * 日束数 + 日束数 - 1 '配列"日配"の要素数。-1は配列の0番目から格納するため-。+日束数は"日束数"個分の"番兵"を追加するため
@@ -193,16 +193,16 @@ Continue:
     Dim 日取変 As Integer: 日取変 = 0                       '配列"日付配"から要素を取り出す変数
     
     For 日変 = 0 To 日数
-        If 日配(日変) = "番兵" Then                                           'もし配列"日付配"から"番兵"というマーカーを取り出したとき
-            With ws.Range(Cells(日行始, 日開始列), Cells(日行始, 日列終))
+        If 日配(日変) = "番兵" Then                                       'もし配列"日付配"から"番兵"というマーカーを取り出したとき
+            With ws.Range(Cells(日行始, 開始日列), Cells(日行始, 日列終))
                 .Value = 日貼配                                           '配列"日貼配"をセルに代入する。(注)以下五行の順番を変えないこと
                 .NumberFormatLocal = "m/d(aaa)"                           '日付表記をyyyy/mm/ddから"m""月""d""日"" (月)に変更"
             End With
-            日取変 = 0                                                        '配列"日貼配"の0番目の要素から配列"日配"の要素を再び格納開始
+            日取変 = 0                                                    '配列"日貼配"の0番目の要素から配列"日配"の要素を再び格納開始
             日行始 = 日行始 + 日コマ数
         Else
-            日貼配(日取変) = 日配(日変)                                       '配列"日付配"の0番目から"日列数"番目の要素を取り出し順に配列"日貼配"の0番目から"日列数"番目まで順に代入していく
-            日取変 = 日取変 + 1                                               '変数をひとつずらす
+            日貼配(日取変) = 日配(日変)                                   '配列"日付配"の0番目から"日列数"番目の要素を取り出し順に配列"日貼配"の0番目から"日列数"番目まで順に代入していく
+            日取変 = 日取変 + 1                                           '変数をひとつずらす
             GoTo 継続
         End If
 継続:
@@ -211,19 +211,18 @@ Continue:
     
 End Function
 
-Function 土日条件付書式(ByVal 土行始 As Integer, ByVal 土行終 As Integer, ByVal 土列始 As Integer, ByVal 土列終 As Integer)
+Function 土日条件付書式()
 
 
     Set ws = Worksheets("2操作画面（編集厳禁）")
 
     Dim 書式設定一  As FormatCondition
-    Dim 書式設定二  As FormatCondition
     
-    With ws.Range(Cells(土行始, 土列始), Cells(土行終, 土列終))
-        .FormatConditions.Delete                                                                                 '条件付き書式設定を初期
-        Set 書式設定一 = .FormatConditions.Add(Type:=xlExpression, Formula1:="=AND(WEEKDAY(A15,2)>=6,A15<>"""",A15<>1)") '選択範囲に(Formula1:=)と(Type:=xlExpression)を用いて関数(=AND(WEEKDAY(A15,2)>=6,A15<>"",A15<>1))を適用。
-        With 書式設定一.Interior                                                                                         'A15の部分は（VBA画面でのみ変更可能）（注）表をAの列(1列目)から始めるとき、日付はB列(2列目)から始まる
-            .ThemeColor = ws.Range("AD7")                                                                               '色と濃度を"色番号と濃度表"の各セルの値を参照して指定
+    With ws.Rows("1:1048576")                                                                                         '1048576行目はexcelの最終行のため修正不要
+        .FormatConditions.Delete                                                                                      '条件付き書式設定を初期
+        Set 書式設定一 = .FormatConditions.Add(Type:=xlExpression, Formula1:="=AND(WEEKDAY(A1,2)>=6,A1<>"""",A1<>1)") '選択範囲に(Formula1:=)と(Type:=xlExpression)を用いて関数(=AND(WEEKDAY(A15,2)>=6,A15<>"",A15<>1))を適用。
+        With 書式設定一.Interior                                                                                      'A15の部分は（VBA画面でのみ変更可能）（注）表をAの列(1列目)から始めるとき、日付はB列(2列目)から始まる
+            .ThemeColor = ws.Range("AD7")                                                                             '色と濃度を"色番号と濃度表"の各セルの値を参照して指定
             .TintAndShade = ws.Range("AE7")
         End With
     End With
@@ -420,7 +419,6 @@ Sub ボタン④新規シート作成と既存シートのデータをコピー�
     Dim フォント As String: フォント = ws.Range("W3") '文字書式はW3セルを参照
     Dim 文字大 As Double: 文字大 = ws.Range("X3")     '文字サイズはX3セルを参照
 
-
     Call ページレイアウトと文字書式(余白上, 余白下, 余白右, 余白左, 行高, 列幅, 文字大, フォント)
 
     '条件付き書式の設定
@@ -429,8 +427,6 @@ Sub ボタン④新規シート作成と既存シートのデータをコピー�
     Dim 列始 As Integer: 列始 = Worksheets("仮名").Range("A3").Column                '表の始まりの範囲(列)
     Dim 列終 As Integer: 列終 = Worksheets("仮名").Range("A3").End(xlToRight).Column '表の最終位置を測定して結果を変数に格納(列)
     '---（VBA画面でのみ変更可能）ここまで---
-    
-    Call 土日条件付書式(行始, 行終, 列始, 列終)
     
     Call 条件付書式(行始, 行終, 列始, 列終)
     
@@ -473,24 +469,6 @@ Function ページレイアウトと文字書式(ByVal ぺ余白上 As Double, B
     End With
 
 
-End Function
-
-Function 土日条件付書式(ByVal 土行始 As Integer, ByVal 土行終 As Integer, ByVal 土列始 As Integer, ByVal 土列終 As Integer)
-
-
-    Set ws = Worksheets("2操作画面（編集厳禁）")
-
-    Dim 書式設定一  As FormatCondition
-    
-    With Worksheets("仮名").Range(Cells(土行始, 土列始), Cells(土行終, 土列終))
-        Set 書式設定一 = .FormatConditions.Add(Type:=xlExpression, Formula1:="=AND(WEEKDAY(A3,2)>=6,A3<>"""",A3<>1)") '選択範囲に(Formula1:=)と(Type:=xlExpression)を用いて関数(=AND(WEEKDAY(A3,2)>=6,A3<>"",A3<>1))を適用。
-        With 書式設定一.Interior                                                                                      'A3の部分は（VBA画面でのみ変更可能）（注）表をAの列(1列目)から始めるとき、日付はB列(2列目)から始まる
-            .ThemeColor = ws.Range("AD7")                                                                             '色と濃度を"色番号と濃度表"の各セルの値を参照して指定
-            .TintAndShade = ws.Range("AE7")
-        End With
-    End With
-            
-            
 End Function
 
 Function 条件付書式(ByVal 条行始 As Integer, ByVal 条行終 As Integer, ByVal 条列始 As Integer, ByVal 条列終 As Integer)
