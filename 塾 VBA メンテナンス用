@@ -131,6 +131,9 @@ Sub ボタン②新規シートを日程表に加工するプログラム()
 
     '日付を自動入力する関数の呼び出し
     Call 日付自動入力(表行始, 表行終, 表列始, 表列終, コマ数, 見出束数)
+
+    '土日に色を付ける条件付き書式を設定する関数の呼び出し
+    Call 土日条件付書式(表行始, 表行終, 表列始, 表列終)
     
     '選択範囲を消去
     Dim 表上削 As Integer: 表上削 = 表行始 - 1                   '表の一行上の位置を特定
@@ -195,7 +198,6 @@ Continue:
                 .Value = 日貼配                                           '配列"日貼配"をセルに代入する。(注)以下五行の順番を変えないこと
                 .NumberFormatLocal = "m/d(aaa)"                           '日付表記をyyyy/mm/ddから"m""月""d""日"" (月)に変更"
             End With
-            Call 土日条件付書式(日行始, 日開始列, 日列終)                   '土日に色を付ける条件付き書式を設定する関数の呼び出し
             日取変 = 0                                                        '配列"日貼配"の0番目の要素から配列"日配"の要素を再び格納開始
             日行始 = 日行始 + 日コマ数
         Else
@@ -209,7 +211,7 @@ Continue:
     
 End Function
 
-Function 土日条件付書式(ByVal 土行始 As Integer, ByVal 土開始列 As Integer, ByVal 土列終 As Integer)
+Function 土日条件付書式(ByVal 土行始 As Integer, ByVal 土行終 As Integer, ByVal 土列始 As Integer, ByVal 土列終 As Integer)
 
 
     Set ws = Worksheets("2操作画面（編集厳禁）")
@@ -217,7 +219,7 @@ Function 土日条件付書式(ByVal 土行始 As Integer, ByVal 土開始列 As
     Dim 書式設定一  As FormatCondition
     Dim 書式設定二  As FormatCondition
     
-    With ws.Range(Cells(土行始, 土開始列), Cells(土行始, 土列終))
+    With ws.Range(Cells(土行始, 土列始), Cells(土行終, 土列終))
         .FormatConditions.Delete                                                                   '条件付き書式設定を初期
         Set 書式設定一 = .FormatConditions.Add(Type:=xlExpression, Formula1:="=WEEKDAY(B15,2)>=6") '選択範囲に(Formula1:=)と(Type:=xlExpression)を用いて関数(=WEEKDAY(B15,2)>=6)を適用
         With 書式設定一.Interior                                                                   'B15の部分は（VBA画面でのみ変更可能）（注）表をAの列(1列目)から始めるとき、日付はB列(2列目)から始まる
