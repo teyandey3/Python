@@ -23,7 +23,8 @@ Sub ボタン①初期化プログラム()
     Dim 表上削 As Integer: 表上削 = 表行始 - 1                              '表の一行上の位置を特定
     
     ws.Range(Cells(表上削, 表列始), Cells(Rows.Count, Columns.Count)).Clear '表の一行上から最終行まで削除
-    ws.Range("B2:J2").ClearContents                                         'セルB2からJ2の内容を消去（VBA画面でのみ変更可能）
+    ws.Range("B2") = ""                                                     'セルB2の内容を消去（VBA画面でのみ変更可能）
+    ws.Range("E2:J2").ClearContents                                         'セルE2からJ2の内容を消去（VBA画面でのみ変更可能）
     ws.Range("E3:J3").ClearContents                                         'セルE3からJ3の内容を消去（VBA画面でのみ変更可能）
     
     '時刻見出作成を作成する関数の呼び出し
@@ -52,8 +53,8 @@ Function 時刻見出作成(ByVal 見行始 As Integer, ByVal 見列始 As Integ
     Dim 時取行 As Integer: 時取行 = Range("Q9").Row
     Dim 時取列始 As Integer: 時取列始 = Range("Q9").Column
     Dim 時取回数 As Integer: 時取回数 = 見コマ数 - 1 '授業開始時刻を入力するセル(Q14から始まる)の最終列を測定（配列が0番目からスタートするため-1する）
-    
     ReDim 時刻配(時取回数) As String
+    
     '時刻の取得
     Dim 時刻取列 As Integer: 時刻取列 = 時取列始 '"時取列始"をループで使用するために新しく変数を定義
     
