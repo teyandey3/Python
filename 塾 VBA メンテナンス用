@@ -419,9 +419,10 @@ Sub ボタン④新規シート作成と既存シートのデータをコピー�
     ActiveSheet.Name = "仮名" '複製したシートに仮名をつける
     
     '新しい表の調整
-    With Worksheets("仮名")                                  '余分な部分の削除
-        .Rows("3:14").Delete                                 'シート"仮名"の3行目から14行目を削除（VBA画面でのみ変更可能）
-        .Range("P1:XFD2").Delete                             'P1:からXFD2セルのメモ欄を削除。XFDセルはexcelの最終列であるため修正不要
+    With Worksheets("仮名")      '余分な部分の削除
+        .Rows("3:14").Delete     'シート"仮名"の3行目から14行目を削除（VBA画面でのみ変更可能）
+        .Range("P1:XFD2").Delete 'P1:からXFD2セルのメモ欄を削除。XFDセルはexcelの最終列であるため修正不要
+        .Range("N1").Clear       'N1セルの判定マーカーを削除
     End With
     
     '---（以下のセル表記はすべてVBA画面でのみ変更可能）---
