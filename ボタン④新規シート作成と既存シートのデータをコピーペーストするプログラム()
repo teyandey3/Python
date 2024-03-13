@@ -78,7 +78,6 @@ Function ページレイアウトと文字書式(ByVal ぺ余白上 As Double, B
     
     '文字書式
     With Worksheets("仮名").Cells
-        .FormatConditions.Delete                             '書式設定を初期
         .RowHeight = Application.CentimetersToPoints(ぺ行高) '行の高さを変更
         .ColumnWidth = ぺ列幅                                '列の幅を変更
         .Font.Name = ぺフォント                              'フォントを変更
